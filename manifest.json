@@ -1,11 +1,10 @@
 {
-	"id": "sample-plugin",
-	"name": "Sample Plugin",
+	"id": "obsidian-NSFW",
+	"name": "Obsidian NSFW",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "Demonstrates some of the capabilities of the Obsidian API.",
-	"author": "Obsidian",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
+	"description": "Obsidian plugin adding a sidebar button that toggles the visibility of NSFW marked files.",
+	"author": "catvatar",
+	"authorUrl": "https://github.com/catvatar",
 	"isDesktopOnly": false
 }
