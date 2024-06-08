@@ -51,7 +51,6 @@ function obsidianSearch(payload: ObsidianSearchPayload) {
   });
   return search;
 }
-
 function obsidianSearchAsync(
   query: string,
   payload: ObsidianSearchPayload = {}
@@ -71,11 +70,21 @@ function obsidianSearchAsync(
   });
 }
 
+class FileFromTo {
+	fromPath: string;
+	toPath: string;
+	constructor(oldPath:string,newPath:string){
+		this.fromPath = oldPath;
+		this.toPath = newPath;
+	}
+}
+
 interface PluginSettings {
 	visibility: boolean;
 	query: string;
 	isolation: string;
 	toggleNotice: boolean;
+	whereAreMyFiles: FileFromTo[];
 }
 
 
@@ -84,6 +93,7 @@ const DEFAULT_SETTINGS: PluginSettings = {
 	query: '["nsfw":true]',
 	isolation: '.NSFW/',
 	toggleNotice: false,
+	whereAreMyFiles: [],
 }
 
 
@@ -93,6 +103,8 @@ export default class ObsidianNSFW extends Plugin {
 
 	async onload() {
 		await this.loadSettings();
+
+		this.app.vault.createFolder(this.settings.isolation);
 
 		const toggleVisibilityButton = this.addRibbonIcon('eye', 'Toggle NSFW Visibility', (evt: MouseEvent) => {
 			this.toggleVisibility();
@@ -169,15 +181,37 @@ export default class ObsidianNSFW extends Plugin {
 		await this.saveData(this.settings);
 	}
 
+	// this.settings.visibility
+	// true -> NSFW files are inside the vault
+	// false -> NSFW files are inside isolation
 	async toggleVisibility() {
 		const new_visibility = !this.settings.visibility;
 		this.settings.visibility = new_visibility;
 
-		const searchResult = await obsidianSearchAsync(this.settings.query);
-		console.log(searchResult);
-		searchResult.forEach((val,key)=>{
-			new Notice(key.name);
-		})
+		if(new_visibility){
+			this.settings.whereAreMyFiles.forEach((file) => {
+				const abstractFile = this.app.vault.getAbstractFileByPath(file.toPath);
+				if (abstractFile) {
+					this.app.vault.rename(abstractFile, file.fromPath);
+				}
+			});
+			this.settings.whereAreMyFiles = [];
+		}else{
+			const searchResult = await obsidianSearchAsync(this.settings.query);
+			searchResult.forEach((_,key)=>{
+				console.log(key);
+				
+				const oldPath = key.path;
+				const newPath = this.settings.isolation + key.name;
+	
+				this.settings.whereAreMyFiles.push(new FileFromTo(
+					oldPath,
+					newPath
+				));
+	
+				this.app.vault.rename(key,newPath)
+			})
+		}
 
 		this.NSFWstatus.setText(new_visibility?'NSFW':'SFW');
 
