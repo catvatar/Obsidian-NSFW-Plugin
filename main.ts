@@ -1,14 +1,88 @@
-import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import { App, Vault, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting, TFile, TFolder, normalizePath, getFrontMatterInfo, WorkspaceLeaf } from 'obsidian';
 
+const hideStyle = "position: fixed; top: 0; left: -9999px; visibility: hidden;";
+
+type ObsidianSearchResult = Map<TFile, { content: string }>;
+
+interface ObsidianSearchPayload {
+  el?: HTMLElement;
+  onStart?: Function;
+  onStop?: (map: ObsidianSearchResult) => void;
+  removeOnStop?: boolean;
+  hideEl?: boolean;
+}
+function obsidianSearch(payload: ObsidianSearchPayload) {
+  const {
+    el = document.body,
+    onStart,
+    onStop,
+    removeOnStop = true,
+    hideEl = true,
+  } = payload;
+  const searchContainer = el.createDiv({
+    attr: {
+      style: hideEl ? hideStyle : "",
+    },
+  });
+// @ts-ignore
+  const search: any = this.app.internalPlugins.plugins["global-search"].views.search(
+	// @ts-ignore
+	new WorkspaceLeaf(this.app)
+  );
+  searchContainer.appendChild(search.containerEl);
+
+  const _onStop = () => {
+    if (removeOnStop) {
+      search.close();
+      searchContainer.remove();
+    }
+    onStop && onStop(search.dom.resultDomLookup);
+  };
+  new MutationObserver(function callback(mutationList) {
+    const [mutation] = mutationList;
+    // @ts-ignore
+    if (mutation.target.classList.contains("is-loading")) {
+      onStart && onStart();
+      return;
+    }
+    _onStop();
+  }).observe(search.containerEl.querySelector(".search-result-container"), {
+    attributeFilter: ["class"],
+  });
+  return search;
+}
+
+function obsidianSearchAsync(
+  query: string,
+  payload: ObsidianSearchPayload = {}
+) {
+  return new Promise<ObsidianSearchResult>((resolve, reject) => {
+    try {
+      obsidianSearch({
+        ...payload,
+        onStop(map) {
+          payload.onStop && payload.onStop(map);
+          resolve(map);
+        },
+      }).setQuery(query);
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
 
 interface PluginSettings {
 	visibility: boolean;
+	query: string;
+	isolation: string;
 	toggleNotice: boolean;
 }
 
 
 const DEFAULT_SETTINGS: PluginSettings = {
 	visibility: true,
+	query: '["nsfw":true]',
+	isolation: '.NSFW/',
 	toggleNotice: false,
 }
 
@@ -39,8 +113,8 @@ export default class ObsidianNSFW extends Plugin {
 		// });
 
 		// // This adds an editor command that can perform some operation on the current editor instance
-		// this.addCommand({
-		// 	id: 'sample-editor-command',
+		// this.addCommand({internalPlugins
+		// 	id: 'sample-editor-command', 
 		// 	name: 'Sample editor command',
 		// 	editorCallback: (editor: Editor, view: MarkdownView) => {
 		// 		console.log(editor.getSelection());
@@ -95,10 +169,16 @@ export default class ObsidianNSFW extends Plugin {
 		await this.saveData(this.settings);
 	}
 
-	toggleVisibility() {
+	async toggleVisibility() {
 		const new_visibility = !this.settings.visibility;
 		this.settings.visibility = new_visibility;
-		
+
+		const searchResult = await obsidianSearchAsync(this.settings.query);
+		console.log(searchResult);
+		searchResult.forEach((val,key)=>{
+			new Notice(key.name);
+		})
+
 		this.NSFWstatus.setText(new_visibility?'NSFW':'SFW');
 
 		if(this.settings.toggleNotice){
@@ -107,7 +187,6 @@ export default class ObsidianNSFW extends Plugin {
 
 		this.saveSettings();
 	}
-
 
 }
 
@@ -152,6 +231,28 @@ class SampleSettingTab extends PluginSettingTab {
 			})
 		
 		containerEl.createEl("h2",{ text: 'Configuration' });
+		new Setting(containerEl)
+			.setName('Ignored directory')
+			.setDesc('By default obsidian ignores `.folders/`')
+			.addText(text => {text
+				.setPlaceholder('This should not be empty')
+				.setValue(this.plugin.settings.isolation)
+				.onChange(async (value) => {
+					this.plugin.settings.isolation = value;
+					await this.plugin.saveSettings();
+				})
+			})
+		new Setting(containerEl)
+			.setName('Query for NSFW files')
+			.setDesc('Search query for files you want to hide')
+			.addText(text => {text
+				.setPlaceholder('This should not be empty')
+				.setValue(this.plugin.settings.query)
+				.onChange(async (value) => {
+					this.plugin.settings.query = value;
+					await this.plugin.saveSettings();
+				})
+			})
 		new Setting(containerEl)
 			.setName('Notice on visibility change')
 			.addToggle((cb)=>{cb
