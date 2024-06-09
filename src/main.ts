@@ -74,7 +74,7 @@ export default class ObsidianNSFW extends Plugin {
 			this.settings.whereAreMyFiles.forEach((file) => {
 				const abstractFile = this.app.vault.getAbstractFileByPath(normalizePath(file.toPath));
 				if (abstractFile) {
-					this.app.vault.rename(abstractFile, file.fromPath);
+					this.app.vault.rename(abstractFile, normalizePath(file.fromPath));
 				}
 			});
 			this.settings.whereAreMyFiles = [];
