@@ -1,6 +1,5 @@
-import { PluginSettingTab, App, Notice, Setting } from "obsidian";
+import { PluginSettingTab, App, Notice, Setting, normalizePath } from "obsidian";
 import ObsidianNSFW from "./main";
-
 
 export class SettingsTab extends PluginSettingTab {
 	plugin: ObsidianNSFW;
@@ -39,6 +38,10 @@ export class SettingsTab extends PluginSettingTab {
 						new Notice('Set vault to NSFW before changing');
 						return;
 					}
+					const oldPath = this.plugin.settings.isolation;
+					//#TODO - rmdir throws is a directory error if recursive is set to false
+					await this.app.vault.adapter.rmdir(normalizePath(oldPath),true);
+					
 					this.plugin.settings.isolation = value;
 					this.app.vault.createFolder(this.plugin.settings.isolation).catch(()=>{});
 					
