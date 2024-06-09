@@ -8,5 +8,5 @@ This project was motivated by the need to hide personal notes from view when sho
 # Guide
 By either clicking the sidebar eye icon, or the `Toggle NSFW filter` command your files will be moved to a designated **NSFW folder** and excluded from your vault. Doing the same again will move files back.
 # Known Issues
-- When files are moved to the **NSFW folder** their original location is saved to `data.json` in **Plugin Directory**, this may be a concent when using outside tools for vault synchronization
+- When files are moved to the **NSFW folder** their original location is saved to `data.json` in **Plugin Directory**, this may be a concert when using outside tools for vault synchronization
 - Before changing **NSFW folder** make sure to have your vault set to **NSFW**
