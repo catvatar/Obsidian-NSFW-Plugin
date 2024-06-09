@@ -104,7 +104,7 @@ export default class ObsidianNSFW extends Plugin {
 	async onload() {
 		await this.loadSettings();
 
-		this.app.vault.createFolder(this.settings.isolation);
+		this.app.vault.createFolder(this.settings.isolation).catch(()=>{});
 
 		const toggleVisibilityButton = this.addRibbonIcon('eye', 'Toggle NSFW Visibility', (evt: MouseEvent) => {
 			this.toggleVisibility();
@@ -157,7 +157,7 @@ export default class ObsidianNSFW extends Plugin {
 		}else{
 			const searchResult = await obsidianSearchAsync(this.settings.query);
 			searchResult.forEach((_,key)=>{
-				console.log(key);
+				// console.log(key);
 				
 				const oldPath = key.path;
 				const newPath = this.settings.isolation + key.name;
@@ -221,7 +221,7 @@ class SampleSettingTab extends PluginSettingTab {
 						return;
 					}
 					this.plugin.settings.isolation = value;
-					this.app.vault.createFolder(this.plugin.settings.isolation);
+					this.app.vault.createFolder(this.plugin.settings.isolation).catch(()=>{});
 					
 					await this.plugin.saveSettings();
 				})
