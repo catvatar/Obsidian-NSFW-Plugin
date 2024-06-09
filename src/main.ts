@@ -2,9 +2,9 @@ import { Notice, Plugin, normalizePath } from 'obsidian';
 
 import { obsidianSearchAsync } from './obsidian-search';
 
-import { SettingsTab } from './settings';
+import { DEFAULT_SETTINGS, PluginSettings, SettingsTab } from './settings';
 
-class FileFromTo {
+export class FileFromTo {
 	fromPath: string;
 	toPath: string;
 	constructor(oldPath:string,newPath:string){
@@ -13,38 +13,26 @@ class FileFromTo {
 	}
 }
 
-interface PluginSettings {
-	visibility: boolean;
-	query: string;
-	isolation: string;
-	toggleNotice: boolean;
-	whereAreMyFiles: FileFromTo[];
-}
 
-
-const DEFAULT_SETTINGS: PluginSettings = {
-	visibility: true,
-	query: '["nsfw":true]',
-	isolation: '.NSFW/',
-	toggleNotice: false,
-	whereAreMyFiles: [],
-}
 
 
 export default class ObsidianNSFW extends Plugin {
 	settings: PluginSettings;
-	NSFWstatus: HTMLElement
+	NSFWstatus: HTMLElement;
+	toggleVisibilityButton: HTMLElement;
 
 	async onload() {
 		await this.loadSettings();
 
 		this.app.vault.createFolder(this.settings.isolation).catch(()=>{});
 
-		const toggleVisibilityButton = this.addRibbonIcon('eye', 'Toggle NSFW Visibility', (evt: MouseEvent) => {
-			this.toggleVisibility();
-		});
+		if(this.settings.toggleEye){
+			this.toggleVisibilityButton = this.addRibbonIcon('eye', 'Toggle NSFW Visibility', (evt: MouseEvent) => {
+				this.toggleVisibility();
+			});
+			this.toggleVisibilityButton.addClass('my-plugin-ribbon-class');
+		}
 
-		toggleVisibilityButton.addClass('my-plugin-ribbon-class');
 
 		this.NSFWstatus = this.addStatusBarItem();
 		this.NSFWstatus.setText(this.settings.visibility?'NSFW':'SFW');

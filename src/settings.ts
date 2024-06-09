@@ -1,5 +1,24 @@
 import { PluginSettingTab, App, Notice, Setting, normalizePath } from "obsidian";
-import ObsidianNSFW from "./main";
+import ObsidianNSFW, { FileFromTo } from "./main";
+
+export interface PluginSettings {
+	visibility: boolean;
+	query: string;
+	isolation: string;
+	toggleNotice: boolean;
+	toggleEye: boolean;
+	whereAreMyFiles: FileFromTo[];
+}
+
+
+export const DEFAULT_SETTINGS: PluginSettings = {
+	visibility: true,
+	query: '["nsfw":true]',
+	isolation: '.NSFW/',
+	toggleNotice: false,
+	toggleEye: true,
+	whereAreMyFiles: [],
+}
 
 export class SettingsTab extends PluginSettingTab {
 	plugin: ObsidianNSFW;
@@ -57,6 +76,17 @@ export class SettingsTab extends PluginSettingTab {
 			.setValue(this.plugin.settings.toggleNotice)
 			.onChange((value)=>{
 				this.plugin.settings.toggleNotice = value;
+				this.plugin.saveSettings();
+				})
+			})
+
+		new Setting(containerEl)
+			.setName('Sidebar Eye icon')
+			.setDesc('Controls whether to add Eye Icon to the sidebar.')
+			.addToggle((cb)=>{cb
+			.setValue(this.plugin.settings.toggleEye)
+			.onChange((value)=>{
+				this.plugin.settings.toggleEye = value;
 				this.plugin.saveSettings();
 				})
 			})
