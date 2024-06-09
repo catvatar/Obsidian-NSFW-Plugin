@@ -1,4 +1,4 @@
-import { Notice, Plugin } from 'obsidian';
+import { Notice, Plugin, normalizePath } from 'obsidian';
 
 import { obsidianSearchAsync } from './obsidian-search';
 
@@ -60,6 +60,12 @@ export default class ObsidianNSFW extends Plugin {
 		this.addSettingTab(new SettingsTab(this.app, this));
 	}
 
+	async onunload() {
+		if(!this.settings.visibility){
+			this.toggleVisibility();
+		}
+	}
+
 	async loadSettings() {
 		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
 	}
@@ -78,7 +84,7 @@ export default class ObsidianNSFW extends Plugin {
 
 		if(new_visibility){
 			this.settings.whereAreMyFiles.forEach((file) => {
-				const abstractFile = this.app.vault.getAbstractFileByPath(file.toPath);
+				const abstractFile = this.app.vault.getAbstractFileByPath(normalizePath(file.toPath));
 				if (abstractFile) {
 					this.app.vault.rename(abstractFile, file.fromPath);
 				}
@@ -89,8 +95,8 @@ export default class ObsidianNSFW extends Plugin {
 			searchResult.forEach((_,key)=>{
 				// console.log(key);
 				
-				const oldPath = key.path;
-				const newPath = this.settings.isolation + key.name;
+				const oldPath = normalizePath(key.path);
+				const newPath = normalizePath(this.settings.isolation + key.name);
 	
 				this.settings.whereAreMyFiles.push(new FileFromTo(
 					oldPath,
