@@ -1,7 +1,7 @@
 {
 	"id": "nsfw-filter",
-	"name": "Obsidian NSFW",
-	"version": "1.0.7",
+	"name": "NSFW filter",
+	"version": "1.0.8",
 	"minAppVersion": "1.1.6",
 	"description": "An Obsidian Plugin adding customizable NSFW filter",
 	"author": "catvatar",
