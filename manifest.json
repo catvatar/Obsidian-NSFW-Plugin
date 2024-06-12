@@ -3,7 +3,7 @@
 	"name": "NSFW filter",
 	"version": "1.0.8",
 	"minAppVersion": "1.1.6",
-	"description": "An Obsidian Plugin adding customizable NSFW filter",
+	"description": "Adds customizable and easly togglable NSFW filter",
 	"author": "catvatar",
 	"authorUrl": "https://github.com/catvatar",
 	"isDesktopOnly": false
