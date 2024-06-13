@@ -23,16 +23,14 @@ export default class ObsidianNSFW extends Plugin {
 
 		this.app.vault.createFolder(this.settings.isolation).catch(() => {});
 
-		if (this.settings.toggleEye) {
-			this.toggleVisibilityButton = this.addRibbonIcon(
-				"eye",
-				"Toggle NSFW Visibility",
-				(evt: MouseEvent) => {
-					this.toggleVisibility();
-				}
-			);
-			this.toggleVisibilityButton.addClass("my-plugin-ribbon-class");
-		}
+		this.toggleVisibilityButton = this.addRibbonIcon(
+			"eye",
+			"Toggle NSFW Visibility",
+			(evt: MouseEvent) => {
+				this.toggleVisibility();
+			}
+		);
+		this.toggleVisibilityButton.addClass("my-plugin-ribbon-class");
 
 		this.NSFWstatus = this.addStatusBarItem();
 		this.NSFWstatus.setText(this.settings.visibility ? "NSFW" : "SFW");
