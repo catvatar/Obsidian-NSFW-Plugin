@@ -65,13 +65,25 @@ export class SettingsTab extends PluginSettingTab {
 							new Notice("Set Vault to NSFW before changing");
 							return;
 						}
-						const oldPath = this.plugin.settings.isolation;
-
-						//#TODO - rmdir throws is a directory error if recursive is set to false
-						await this.app.vault.adapter.rmdir(
-							normalizePath(oldPath),
-							true
+						const oldPath = normalizePath(
+							this.plugin.settings.isolation
 						);
+
+						const filesInFolder = await this.app.vault.adapter.list(
+							oldPath
+						);
+						const areThereFilesInFolder =
+							filesInFolder.files.length +
+								filesInFolder.folders.length >
+							0;
+						if (areThereFilesInFolder) {
+							new Notice(
+								"OLD FOLDER NOT EMPTY, MOVE FILES FIRST"
+							);
+							return;
+						}
+						//#TODO - rmdir throws is a directory error if recursive is set to false
+						await this.app.vault.adapter.rmdir(oldPath, true);
 
 						this.plugin.settings.isolation = normalizePath(value);
 						this.app.vault
