@@ -36,8 +36,8 @@ export default class ObsidianNSFW extends Plugin {
 		this.NSFWstatus.setText(this.settings.visibility ? "NSFW" : "SFW");
 
 		this.addCommand({
-			id: "toggle NSFW filter",
-			name: "Toggle NSFW filter",
+			id: "toggle filter",
+			name: "Toggle filter",
 			callback: () => {
 				this.toggleVisibility();
 			},
