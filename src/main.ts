@@ -25,7 +25,7 @@ export default class ObsidianNSFW extends Plugin {
 
 		this.toggleVisibilityButton = this.addRibbonIcon(
 			"eye",
-			"Toggle NSFW Visibility",
+			"Toggle NSFW visibility",
 			(evt: MouseEvent) => {
 				this.toggleVisibility();
 			}

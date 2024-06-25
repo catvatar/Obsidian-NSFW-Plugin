@@ -50,7 +50,7 @@ export class SettingsTab extends PluginSettingTab {
 					});
 			});
 		containerEl.createEl("a", {
-			text: "Read More",
+			text: "Read more",
 			href: "https://help.obsidian.md/Plugins/Search",
 		});
 
